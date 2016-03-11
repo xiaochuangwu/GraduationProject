@@ -9,10 +9,13 @@
 #import "NewsViewController.h"
 #import "DataManager.h"
 #import "DDataModels.h"
+
+#import "UIImageView+WebCache.h"
 @interface NewsViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
     
     DDetailedNewsModel *model;
+    
     UITableView *_tableView;
 }
 @end
@@ -38,30 +41,18 @@
     
     [self.view addSubview:_tableView];
    
-    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    btn.frame = CGRectMake(100, 100, 100, 100);
-    btn.backgroundColor = [UIColor orangeColor];
-    [btn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:btn];
+   
     
     [DataManager getDetailedNewsWithAid:_listModel.aid completion:^(NSDictionary *dic) {
         
         model = [DDetailedNewsModel modelObjectWithDictionary:dic];
-        
+       
         [_tableView reloadData];
     }];
     
 }
 
-- (void)btnClick
-{
 
-   //[DataManager getDatasWithUrl:model.articleInfo.shareUrl completion:^(NSDictionary *dic) {
-       
-    NSLog(@"%@",model.articleInfo.content);
-    
-   //}];
-}
 
 
 
@@ -81,7 +72,7 @@
         cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
     }
     
-   
+    
     return cell;
 
 }

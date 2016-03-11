@@ -117,6 +117,7 @@
        // }
    // }
     //cell.textLabel.text = titleArray[indexPath.row];
+    //阿萨是多少 
     return cell;
     
 }
@@ -243,7 +244,7 @@
 {
 
     AddChannelViewController *addVc = [[AddChannelViewController alloc]init];
-    [addVc.myTerm setArray:model.categoryList];
+    //[addVc.myTerm setArray:model.categoryList];
     [self.navigationController pushViewController:addVc animated:YES];
 
 

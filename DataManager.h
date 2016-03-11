@@ -14,7 +14,8 @@
 
 #define NEWSLIST_URL @"http://api.myhaowai.com/appsite_api/category/get_category?devid=f589425e6e9a56a9e345cc14efa5df3c&version=1.2.0&pcode=01100016&direction=1&pageNumber=3&lastId=2016030321377"//新闻列表url
 
-#define DETAILEDNEWS_URL @"http://api.myhaowai.com/appsite_api/article/get_article_by_aid?"
+#define DETAILEDNEWS_URL @"http://api.myhaowai.com/appsite_api/html5/get_related_article_by_aid?"
+//#define DETAILEDNEWS_URL @"http://api.myhaowai.com/appsite_api/article/get_article_by_aid?"
 //定义一个请求成功的block
 typedef void (^CompletionBlock)(NSDictionary* dic);
 @interface DataManager : NSObject
@@ -31,8 +32,6 @@ typedef void (^CompletionBlock)(NSDictionary* dic);
 //请求新闻详情信息
 + (void)getDetailedNewsWithAid:(NSString*)aid completion:(CompletionBlock)block;
 
-//请求数据
 
-+ (void)getDatasWithUrl:(NSString*)url completion:(CompletionBlock)block;
 
 @end

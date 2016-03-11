@@ -8,12 +8,26 @@
 
 #import "AddChannelViewController.h"
 
-@interface AddChannelViewController ()<UICollectionViewDataSource,UICollectionViewDelegate>
+
+#define KBase_tag1     100
+#define KBase_tag2     500
+#define IphoneWidth   [UIScreen mainScreen].bounds.size.width
+#define IphoneHeight  [UIScreen mainScreen].bounds.size.height
+@interface AddChannelViewController ()
 {
     
-    NSMutableArray *imagineTerm;
-
-
+    NSInteger num1;
+    NSInteger num2;
+    // 开始拖动的view的下一个view的CGPoint（如果开始位置是0 结束位置是4 nextPoint值逐个往下算）
+    CGPoint nextPoint;
+    
+    // 用于赋值CGPoint
+    CGPoint valuePoint;
+    NSMutableArray *btnArr1;
+    NSMutableArray *btnArr2;
+    
+    NSMutableArray *buttonArr1;
+    NSMutableArray *buttonArr2;
 }
 
 @end
@@ -26,36 +40,368 @@
     self.view.backgroundColor = [UIColor whiteColor];
    
      self.navigationController.navigationBar.hidden = YES;
+    btnArr1 = [[NSMutableArray alloc]init];
+    btnArr2 = [[NSMutableArray alloc]init];
+    buttonArr1 = [[NSMutableArray alloc]init];
+    buttonArr2 = [[NSMutableArray alloc]init];
+    [btnArr1 addObject:@"文史"];
+    [btnArr1 addObject:@"地理"];
+    [btnArr1 addObject:@"军事"];
+    [btnArr1 addObject:@"文化"];
+    [btnArr1 addObject:@"财经"];
+    [btnArr1 addObject:@"政法"];
+    [btnArr1 addObject:@"幽灵"];
+    [btnArr1 addObject:@"诡异"];
+    [btnArr2 addObject:@"美女"];
+    [btnArr2 addObject:@"两性"];
+    [btnArr2 addObject:@"电影"];
+    [btnArr2 addObject:@"社会"];
+    [btnArr2 addObject:@"出轨"];
+    [btnArr2 addObject:@"外遇"];
+    [btnArr2 addObject:@"美食"];
+    [btnArr2 addObject:@"游戏"];
+    [btnArr2 addObject:@"政治"];
+    [btnArr2 addObject:@"物理"];
+    [btnArr2 addObject:@"科技"];
+    [btnArr2 addObject:@"航空"];
+    [btnArr2 addObject:@"小三"];
+    [btnArr2 addObject:@"包养"];
+    [btnArr2 addObject:@"健康"];
+    NSLog(@"%lu",(unsigned long)btnArr1.count);
+    num1 = btnArr1.count;
+    num2 = btnArr2.count;
     //布局假的导航条
     [self layouNavBar];
-    
-    imagineTerm = [[NSMutableArray alloc]init];
-    UICollectionViewFlowLayout *flowlayout = [[UICollectionViewFlowLayout alloc]init];
-    //行的最小间距
-    flowlayout.minimumLineSpacing = 10;
-    //每隔单元格的最小间距
-    flowlayout.minimumInteritemSpacing = 10;
-    //滑动的方向
-    flowlayout.scrollDirection =  UICollectionViewScrollDirectionVertical;
-    //控件的上左下右间距
-    flowlayout.sectionInset = UIEdgeInsetsMake(60, 10, 0, 10);
-    //单元格的大小
-    flowlayout.itemSize = CGSizeMake((CGRectGetWidth(self.view.frame)-40)/3.0, 40);
-     
-    //一个layout对象,不能同时给两个collection来使用
-    //创建
-    //根tableview的区别,后面多了个layout
-    UICollectionView *collectionView = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 90, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame)) collectionViewLayout:flowlayout];
-    collectionView.delegate = self;
-    collectionView.dataSource = self;
-    //默认是黑色的
-    collectionView.backgroundColor = [UIColor whiteColor];
-    [self.view addSubview:collectionView];
-    
-    //注册cell
-    [collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
+ 
+    [self setButton];
+
+
+
     
 }
+
+
+- (void)setButton
+{
+    // 创建9宫格
+    CGFloat btW = (IphoneWidth-20*5)/4;
+    CGFloat btH = 20;
+    
+    for (NSInteger i = 0; i < num1; i++)
+    {
+        
+        UIButton * bt = [UIButton buttonWithType:UIButtonTypeCustom];
+        bt.frame = CGRectMake(20+(20+btW)*(i%4), 100 + (i/4)*(btH+20), btW, btH);
+        bt.backgroundColor = [UIColor redColor];
+        bt.tag = KBase_tag1+i;
+        [bt setTitle:btnArr1[i] forState:UIControlStateNormal];
+         [bt addTarget:self action:@selector(doAdd:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bt];
+        // 长按手势
+        UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        [bt addGestureRecognizer:longPress];
+        [buttonArr1 addObject:bt];
+        
+    }
+    
+    UIButton *button = buttonArr1[buttonArr1.count-1];
+    
+    for (NSInteger i = 0; i<num2; i++)
+    {
+        
+        
+        UIButton * bt = [UIButton buttonWithType:UIButtonTypeCustom];
+        bt.frame = CGRectMake(20+(20+btW)*(i%4), button.frame.origin.y +80 + (i/4)*(btH+20), btW, btH);
+        bt.backgroundColor = [UIColor redColor];
+        bt.tag = KBase_tag2+i;
+        [bt setTitle:btnArr2[i] forState:UIControlStateNormal];
+         [bt addTarget:self action:@selector(doAdd:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bt];
+        
+        
+        [buttonArr2 addObject:bt];
+        
+    }
+
+
+
+}
+
+- (void)doAdd:(UIButton*)bt;
+{
+
+    
+    if (bt.tag>=500)
+    {
+        // 需要移除的view的位置
+        CGPoint btPoint = bt.center;
+        NSInteger btIndex  = bt.tag - KBase_tag2;
+        
+        NSString *str = btnArr2[btIndex];
+        // 移除view
+        //[bt removeFromSuperview];
+        
+        // 把需要删除view的下一个view移动到记录的view的位置(valuePoint)，并把下一view的位置记为新的nextPoint，并把view的tag值-1,依次处理
+        __block CGPoint  wbtPoint = btPoint;
+        [UIView animateWithDuration:0.3 animations:^{
+            for (NSInteger i = btIndex+1; i<num2; i++) {
+                UIButton * nextBt = (UIButton*)[self.view viewWithTag:KBase_tag2+i];
+                nextPoint = nextBt.center;
+                nextBt.center = wbtPoint;
+                wbtPoint = nextPoint;
+                
+                nextBt.tag --;
+                //[nextBt setTitle:[NSString stringWithFormat:@"tag值%ld",nextBt.tag] forState:UIControlStateNormal];
+                
+            }
+            
+        } completion:^(BOOL finished) {
+            num2--;
+            [btnArr2 removeObjectAtIndex:btIndex];
+            [buttonArr2 removeObject:bt];
+            [buttonArr1 addObject:bt];
+        }];
+        [self addBtn1With:str button:bt];
+        
+
+    }
+    else
+    {
+        // 需要移除的view的位置
+        CGPoint btPoint = bt.center;
+        NSInteger btIndex  = bt.tag - KBase_tag1;
+        
+        NSString *str = btnArr1[btIndex];
+        // 移除view
+        //[bt removeFromSuperview];
+        
+        // 把需要删除view的下一个view移动到记录的view的位置(valuePoint)，并把下一view的位置记为新的nextPoint，并把view的tag值-1,依次处理
+        __block CGPoint  wbtPoint = btPoint;
+        [UIView animateWithDuration:0.3 animations:^{
+            for (NSInteger i = btIndex+1; i<num1; i++) {
+                UIButton * nextBt = (UIButton*)[self.view viewWithTag:KBase_tag1+i];
+                nextPoint = nextBt.center;
+                nextBt.center = wbtPoint;
+                wbtPoint = nextPoint;
+                
+                nextBt.tag --;
+                //[nextBt setTitle:[NSString stringWithFormat:@"tag值%ld",nextBt.tag] forState:UIControlStateNormal];
+                
+            }
+            
+        } completion:^(BOOL finished) {
+            num2--;
+            [btnArr1 removeObjectAtIndex:btIndex];
+            [buttonArr1 removeObject:bt];
+            [buttonArr2 insertObject:bt atIndex:0];
+            [btnArr2 insertObject:str atIndex:0];
+        }];
+        [self addBtn1With:str button:bt];
+        
+
+    
+    
+    
+    
+    }
+}
+
+- (void)addBtn1With:(NSString*)str button:(UIButton*)btn
+{
+    if (btn.tag>=500)
+    {
+        CGFloat btW = (IphoneWidth-20*5)/4;
+        CGFloat btH = 20;
+        
+        num1++;
+        NSInteger btIndex = num1-1;
+        
+        UIButton * bt = [UIButton buttonWithType:UIButtonTypeCustom];
+        bt.frame = CGRectMake(20+(20+btW)*(btIndex%4), 100 + (btIndex/4)*(btH+20), btW, btH);
+        bt.backgroundColor = [UIColor redColor];
+        bt.tag = KBase_tag1+btIndex;
+        [bt setTitle:str forState:UIControlStateNormal];
+        //[bt addTarget:self action:@selector(doDelete:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bt];
+        
+        // 长按手势
+        UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        [bt addGestureRecognizer:longPress];
+        
+        for (UIButton *btn in buttonArr2)
+        {
+            NSInteger i = btn.tag - KBase_tag2;
+            btn.frame =  CGRectMake(20+(20+btW)*(i%4), bt.frame.origin.y +80 + (i/4)*(btH+20), btW, btH);
+            
+            
+            
+        }
+
+    }
+    else
+    {
+        CGFloat btW = (IphoneWidth-20*5)/4;
+        CGFloat btH = 20;
+        
+        num1++;
+        NSInteger btIndex = num1-1;
+        
+        UIButton * bt = [UIButton buttonWithType:UIButtonTypeCustom];
+        bt.frame = CGRectMake(20+(20+btW)*(btIndex%4), bt.frame.origin.y +80 + (btIndex/4)*(btH+20), btW, btH);
+        bt.backgroundColor = [UIColor redColor];
+        bt.tag = KBase_tag2+btIndex;
+        [bt setTitle:str forState:UIControlStateNormal];
+        //[bt addTarget:self action:@selector(doDelete:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bt];
+        
+        // 长按手势
+        UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        [bt addGestureRecognizer:longPress];
+        
+        for (UIButton *btn in buttonArr1)
+        {
+            NSInteger i = btn.tag - KBase_tag1;
+            btn.frame =  CGRectMake(20+(20+btW)*(i%4), bt.frame.origin.y +80 + (i/4)*(btH+20), btW, btH);
+            
+            
+            
+        }
+
+    
+    }
+    
+
+
+
+}
+/**
+ *  长按手势
+ */
+-(void)longPress:(UIGestureRecognizer*)recognizer{
+    //
+    UIButton *recognizerView = (UIButton *)recognizer.view;
+    
+    // 禁用其他按钮的拖拽手势
+    for (UIButton * bt in self.view.subviews) {
+        if (bt!=recognizerView) {
+            bt.userInteractionEnabled = NO;
+        }
+    }
+    
+    // 长按视图在父视图中的位置（触摸点的位置）
+    CGPoint recognizerPoint = [recognizer locationInView:self.view];
+    NSLog(@"_____%@",NSStringFromCGPoint(recognizerPoint));
+    
+    if (recognizer.state == UIGestureRecognizerStateBegan) {
+        
+        // 开始的时候改变拖动view的外观（放大，改变颜色等）
+        [UIView animateWithDuration:0.2 animations:^{
+            recognizerView.transform = CGAffineTransformMakeScale(1.3, 1.3);
+            recognizerView.alpha = 0.7;
+        }];
+        
+        // 把拖动view放到最上层
+        [self.view bringSubviewToFront:recognizerView];
+        
+        // valuePoint保存最新的移动位置
+        valuePoint = recognizerView.center;
+        
+    }else if(recognizer.state == UIGestureRecognizerStateChanged){
+        
+        // 更新pan.view的center
+        recognizerView.center = recognizerPoint;
+        
+        /**
+         * 可以创建一个继承UIButton的类(MyButton)，这样便于扩展，增加一些属性来绑定数据
+         * 如果在self.view上加其他控件拖拽会奔溃，可以在下面方法里面加判断MyButton，也可以把所有按钮放到一个全局变量的UIView上来替换self.view
+         
+         */
+        for (UIButton * bt in self.view.subviews) {
+            
+            // 判断是否移动到另一个view区域
+            // CGRectContainsPoint(rect,point) 判断某个点是否被某个frame包含
+            if (CGRectContainsPoint(bt.frame, recognizerView.center)&&bt!=recognizerView)
+            {
+                NSLog(@"bt_______%@",bt);
+                // 开始位置
+                NSInteger fromIndex = recognizerView.tag - KBase_tag1;
+                
+                // 需要移动到的位置
+                NSInteger toIndex = bt.tag - KBase_tag1;
+                NSLog(@"开始位置=%ld  结束位置=%ld",fromIndex,toIndex);
+                
+                // 往后移动
+                if ((toIndex-fromIndex)>0) {
+                    
+                    // 从开始位置移动到结束位置
+                    // 把移动view的下一个view移动到记录的view的位置(valuePoint)，并把下一view的位置记为新的nextPoint，并把view的tag值-1,依次类推
+                    [UIView animateWithDuration:0.2 animations:^{
+                        for (NSInteger i = fromIndex+1; i<=toIndex; i++) {
+                            UIButton * nextBt = (UIButton*)[self.view viewWithTag:KBase_tag1+i];
+                            nextPoint = nextBt.center;
+                            nextBt.center = valuePoint;
+                            valuePoint = nextPoint;
+                            
+                            nextBt.tag--;
+                            
+                            
+                        }
+                        recognizerView.tag = KBase_tag1 + toIndex;
+                        
+                        
+                    }];
+                    
+                }
+                // 往前移动
+                else
+                {
+                    // 从开始位置移动到结束位置
+                    // 把移动view的上一个view移动到记录的view的位置(valuePoint)，并把上一view的位置记为新的nextPoint，并把view的tag值+1,依次类推
+                    [UIView animateWithDuration:0.2 animations:^{
+                        for (NSInteger i = fromIndex-1; i>=toIndex; i--) {
+                            UIButton * nextBt = (UIButton*)[self.view viewWithTag:KBase_tag1+i];
+                            nextPoint = nextBt.center;
+                            nextBt.center = valuePoint;
+                            valuePoint = nextPoint;
+                            
+                            nextBt.tag++;
+                            
+                        }
+                        recognizerView.tag = KBase_tag1 + toIndex;
+                        
+                        
+                    }];
+                    
+                }
+                
+                
+                
+            }
+            
+        }
+        
+        
+    }else if(recognizer.state == UIGestureRecognizerStateEnded){
+        // 恢复其他按钮的拖拽手势
+        for (UIButton * bt in self.view.subviews) {
+            if (bt!=recognizerView) {
+                bt.userInteractionEnabled = YES;
+            }
+        }
+        
+        // 结束时候恢复view的外观（放大，改变颜色等）
+        [UIView animateWithDuration:0.2 animations:^{
+            recognizerView.transform = CGAffineTransformMakeScale(1.0, 1.0);
+            recognizerView.alpha = 1;
+            
+            recognizerView.center = valuePoint;
+        }];
+    }
+    
+    
+    
+}
+
 //布局假的导航条
 - (void)layouNavBar
 {
@@ -115,9 +461,25 @@
 //添加频道,频道排序删除
 - (void)addAndChange:(UIButton*)sender
 {
-
-
-
+    CGFloat btW = (IphoneWidth-20*5)/4;
+    CGFloat btH = 20;
+    
+    num1++;
+    NSInteger btIndex = num1-1;
+    
+    UIButton * bt = [UIButton buttonWithType:UIButtonTypeCustom];
+    bt.frame = CGRectMake(20+(20+btW)*(btIndex%4), 100 + (btIndex/4)*(btH+20), btW, btH);
+    bt.backgroundColor = [UIColor redColor];
+    bt.tag = KBase_tag1+btIndex;
+    [bt setTitle:[NSString stringWithFormat:@"tag值%ld",bt.tag] forState:UIControlStateNormal];
+    //[bt addTarget:self action:@selector(doDelete:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:bt];
+    
+    // 长按手势
+    UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+    [bt addGestureRecognizer:longPress];
+    [btnArr1 addObject:bt];
+ 
 }
 //返回
 - (void)back:(UIButton*)button
@@ -125,49 +487,6 @@
 
 
     [self.navigationController popToRootViewControllerAnimated:YES];
-}
-#pragma mark----UICollectionViewDataSource
-//行数
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
-{
-    if (section==0)
-    {
-        return _myTerm.count;
-    }
-    else
-    {
-    
-        return 10;
-    }
-    
-    
-}
-
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
-{
-
-    return 2;
-}
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
-{
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
-    cell.backgroundColor = [UIColor colorWithHue:(arc4random()%255/255.0) saturation:(arc4random()%255/255.0) brightness:(arc4random()%255/255.0) alpha:1];
-    
-    return cell;
-}
-
-
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (indexPath.section==1)
-    {
-        [_myTerm addObject:[NSString stringWithFormat:@"%ld",indexPath.row]];
-        [collectionView reloadData];
-    }
-
-    NSLog(@"%ld",(long)indexPath.row);
-    
-    
 }
 
 - (void)didReceiveMemoryWarning
